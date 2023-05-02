@@ -42,85 +42,23 @@ class AI {
     }
     return result
   }
-  getDirection(foodCoords, headCoords, headDirection) {
-    let coords = []
+  getDirection(headCoords) {
     const currentHamiltonianPoint = this.hamiltonianPoints.indexOf(`${headCoords[0]} ${headCoords[1]}`)
-    if (headDirection === 'left') {
-      coords.push({
-        appleDistance: Math.floor(Math.sqrt(Math.pow(foodCoords[0] - headCoords[0] - this.objectsWeight, 2) + Math.pow(foodCoords[1] - headCoords[1], 2))),
-        hamiltonianPoint: this.hamiltonianPoints.indexOf(`${headCoords[0] - this.objectsWeight} ${headCoords[1]}`),
-        direction: 'left'
-      })
-      coords.push({
-        appleDistance: Math.floor(Math.sqrt(Math.pow(foodCoords[0] - headCoords[0], 2) + Math.pow(foodCoords[1] - headCoords[1] - this.objectsWeight, 2))),
-        hamiltonianPoint: this.hamiltonianPoints.indexOf(`${headCoords[0]} ${headCoords[1] - this.objectsWeight}`),
-        direction: 'top'
-      })
-      coords.push({
-        appleDistance: Math.floor(Math.sqrt(Math.pow(foodCoords[0] - headCoords[0], 2) + Math.pow(foodCoords[1] - headCoords[1] + this.objectsWeight, 2))),
-        hamiltonianPoint: this.hamiltonianPoints.indexOf(`${headCoords[0]} ${headCoords[1] + this.objectsWeight}`),
-        direction: 'bottom'
-      })
+    const hamiltonianPointOnTheTop = this.hamiltonianPoints.indexOf(`${headCoords[0]} ${headCoords[1] - this.objectsWeight}`)
+    const hamiltonianPointOnTheBottom = this.hamiltonianPoints.indexOf(`${headCoords[0]} ${headCoords[1] + this.objectsWeight}`)
+    const hamiltonianPointOnTheLeft = this.hamiltonianPoints.indexOf(`${headCoords[0] - this.objectsWeight} ${headCoords[1]}`)
+    const hamiltonianPointOnTheRight = this.hamiltonianPoints.indexOf(`${headCoords[0] + this.objectsWeight} ${headCoords[1]}`)
+    if (hamiltonianPointOnTheTop === currentHamiltonianPoint + 1 || hamiltonianPointOnTheTop === 0) {
+      return 'top'
     }
-    else if (headDirection === 'right') {
-      coords.push({
-        appleDistance: Math.floor(Math.sqrt(Math.pow(foodCoords[0] - headCoords[0] + this.objectsWeight, 2) + Math.pow(foodCoords[1] - headCoords[1], 2))),
-        hamiltonianPoint: this.hamiltonianPoints.indexOf(`${headCoords[0] + this.objectsWeight} ${headCoords[1]}`),
-        direction: 'right'
-      })
-      coords.push({
-        appleDistance: Math.floor(Math.sqrt(Math.pow(foodCoords[0] - headCoords[0], 2) + Math.pow(foodCoords[1] - headCoords[1] - this.objectsWeight, 2))),
-        hamiltonianPoint: this.hamiltonianPoints.indexOf(`${headCoords[0]} ${headCoords[1] - this.objectsWeight}`),
-        direction: 'top'
-      })
-      coords.push({
-        appleDistance: Math.floor(Math.sqrt(Math.pow(foodCoords[0] - headCoords[0], 2) + Math.pow(foodCoords[1] - headCoords[1] + this.objectsWeight, 2))),
-        hamiltonianPoint: this.hamiltonianPoints.indexOf(`${headCoords[0]} ${headCoords[1] + this.objectsWeight}`),
-        direction: 'bottom'
-      })
+    if (hamiltonianPointOnTheBottom === currentHamiltonianPoint + 1 || hamiltonianPointOnTheTop === 0) {
+      return 'bottom'
     }
-    else if (headDirection === 'top') {
-      coords.push({
-        appleDistance: Math.floor(Math.sqrt(Math.pow(foodCoords[0] - headCoords[0], 2) + Math.pow(foodCoords[1] - headCoords[1] - this.objectsWeight, 2))),
-        hamiltonianPoint: this.hamiltonianPoints.indexOf(`${headCoords[0]} ${headCoords[1] - this.objectsWeight}`),
-        direction: 'top'
-      })
-      coords.push({
-        appleDistance: Math.floor(Math.sqrt(Math.pow(foodCoords[0] - headCoords[0] - this.objectsWeight, 2) + Math.pow(foodCoords[1] - headCoords[1], 2))),
-        hamiltonianPoint: this.hamiltonianPoints.indexOf(`${headCoords[0] - this.objectsWeight} ${headCoords[1]}`),
-        direction: 'left'
-      })
-      coords.push({
-        appleDistance: Math.floor(Math.sqrt(Math.pow(foodCoords[0] - headCoords[0] + this.objectsWeight, 2) + Math.pow(foodCoords[1] - headCoords[1], 2))),
-        hamiltonianPoint: this.hamiltonianPoints.indexOf(`${headCoords[0] + this.objectsWeight} ${headCoords[1]}`),
-        direction: 'right'
-      })
+    if (hamiltonianPointOnTheLeft === currentHamiltonianPoint + 1 || hamiltonianPointOnTheTop === 0) {
+      return 'left'
     }
-    else if (headDirection === 'bottom') {
-      coords.push({
-        appleDistance: Math.floor(Math.sqrt(Math.pow(foodCoords[0] - headCoords[0], 2) + Math.pow(foodCoords[1] - headCoords[1] + this.objectsWeight, 2))),
-        hamiltonianPoint: this.hamiltonianPoints.indexOf(`${headCoords[0]} ${headCoords[1] + this.objectsWeight}`),
-        direction: 'bottom'
-      })
-      coords.push({
-        appleDistance: Math.floor(Math.sqrt(Math.pow(foodCoords[0] - headCoords[0] - this.objectsWeight, 2) + Math.pow(foodCoords[1] - headCoords[1], 2))),
-        hamiltonianPoint: this.hamiltonianPoints.indexOf(`${headCoords[0] - this.objectsWeight} ${headCoords[1]}`),
-        direction: 'left'
-      })
-      coords.push({
-        appleDistance: Math.floor(Math.sqrt(Math.pow(foodCoords[0] - headCoords[0] + this.objectsWeight, 2) + Math.pow(foodCoords[1] - headCoords[1], 2))),
-        hamiltonianPoint: this.hamiltonianPoints.indexOf(`${headCoords[0] + this.objectsWeight} ${headCoords[1]}`),
-        direction: 'right'
-      })
+    if (hamiltonianPointOnTheRight === currentHamiltonianPoint + 1 || hamiltonianPointOnTheTop === 0) {
+      return 'right'
     }
-    let direction = null
-    for (let i = 0; i < coords.length; i++) {
-      if (coords[i].hamiltonianPoint - currentHamiltonianPoint === 1 || coords[i].hamiltonianPoint === 0) {
-        direction = coords[i].direction
-        break
-      }
-    }
-    console.log(currentHamiltonianPoint, coords, direction);
-    return direction
   }
 }

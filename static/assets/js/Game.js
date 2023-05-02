@@ -43,7 +43,6 @@ class Food extends Arena {
     this.ctx.fillRect(this.foodX + (this.objectsWeight / 4), this.foodY + (this.objectsWeight / 4), this.objectsWeight / 2, this.objectsWeight / 2)
   }
   foodSpawn(snakeTail) {
-    // реализовать оптимальный поиск места для спавна яблок
     const foodX = Math.floor(Math.random() * (this.arenaWidth / this.objectsWeight)) * this.objectsWeight
     const foodY = Math.floor(Math.random() * (this.arenaHeight / this.objectsWeight)) * this.objectsWeight
     let flag = false
@@ -59,17 +58,6 @@ class Food extends Arena {
       this.foodX = foodX
       this.foodY = foodY
     }
-    /* let aviablePlaces = []
-    this.allArenaPoints.forEach(point => {
-      snakeTail.forEach(tail => {
-        if (tail[0] !== point[0] || tail[1] !== point[1]) {
-          aviablePlaces.push([point[0], point[1]])
-        }
-      })
-    })
-    const newPlace = Math.floor(Math.random() * aviablePlaces.length)
-    this.foodX = aviablePlaces[newPlace][0]
-    this.foodY = aviablePlaces[newPlace][1] */
   }
 }
 
@@ -87,7 +75,7 @@ class Snake extends Food {
   getSnakeStartPos() {
     this.snakeHeadX = Math.floor(this.arenaWidth / this.objectsWeight / 2) * this.objectsWeight
     this.snakeHeadY = Math.floor(this.arenaHeight / this.objectsWeight / 2) * this.objectsWeight
-    this.snakeTail = [[this.snakeHeadX, this.snakeHeadY]]
+    this.snakeTail = [[this.snakeHeadX, this.snakeHeadY], [this.snakeHeadX + this.objectsWeight, this.snakeHeadY]]
     this.snakeDirection = 'left'
   }
   snakeRender() {
@@ -152,22 +140,16 @@ class Snake extends Food {
     }
   }
   snakeAddPoint() {
-    if (this.snakeDirection === 'right') {
-      this.snakeHeadX += this.objectsWeight
-      this.snakeTail.unshift([this.snakeHeadX, this.snakeHeadY])
+    const lastSnakePoint = this.snakeTail[this.snakeTail.length - 1]
+    const secondLastSnakePoint = this.snakeTail[this.snakeTail.length - 2]
+    let x = lastSnakePoint[0]
+    let y = lastSnakePoint[1]
+    if (lastSnakePoint[0] === secondLastSnakePoint[0]) {
+      y = lastSnakePoint[1] + (lastSnakePoint[1] - secondLastSnakePoint[1])
+    }else if (lastSnakePoint[1] === secondLastSnakePoint[1]) {
+      x = lastSnakePoint[0] + (lastSnakePoint[0] - secondLastSnakePoint[0])
     }
-    else if (this.snakeDirection === 'left') {
-      this.snakeHeadX -= this.objectsWeight
-      this.snakeTail.unshift([this.snakeHeadX, this.snakeHeadY])
-    }
-    else if (this.snakeDirection === 'top') {
-      this.snakeHeadY -= this.objectsWeight
-      this.snakeTail.unshift([this.snakeHeadX, this.snakeHeadY])
-    }
-    else if (this.snakeDirection === 'bottom') {
-      this.snakeHeadY += this.objectsWeight
-      this.snakeTail.unshift([this.snakeHeadX, this.snakeHeadY])
-    }
+    this.snakeTail.push([x, y])
   }
   isSnakeHit() {
     if (this.snakeHeadX < 0 || this.snakeHeadX >= this.arenaWidth) {
@@ -201,7 +183,6 @@ class Snake extends Food {
   snakeInit() {
     this.getSnakeStartPos()
     this.snakeAddPoint()
-    this.snakeAddPoint()
     this.foodSpawn(this.snakeTail)
 
     this.foodRender()
@@ -217,13 +198,16 @@ class GamePolling extends Snake {
   }
   startGamePolling() {
     this.polling = setInterval(() => {
-      if (this.isSnakeHit()) {
+      if (
+        this.isSnakeHit() ||
+        this.snakeTail.length >= (((this.arenaWidth / this.objectsWeight) * (this.arenaHeight / this.objectsWeight)) - 1)
+      ) {
         clearInterval(this.polling)
         return
       }
-      this.snakeChangeDirection(this.ai.getDirection([this.foodX, this.foodY], [this.snakeHeadX, this.snakeHeadY], this.snakeDirection))
-      this.ctx.clearRect(0, 0, this.arenaWidth, this.arenaHeight)
+      this.snakeChangeDirection(this.ai.getDirection([this.snakeHeadX, this.snakeHeadY]))
       this.isSnakeAteFood()
+      this.ctx.clearRect(0, 0, this.arenaWidth, this.arenaHeight)
       this.foodRender()
       this.snakeMove()
     }, 10);

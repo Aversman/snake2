@@ -25,11 +25,8 @@ function getDirection(event) {
 function main() {
   const userControllerMode = false
   const game = new GamePolling()
-  //game.showHamiltonianPoints()
-  //console.log(game.ai.hamiltonianPoints);
-  //game.renderPoint(20, 580)
   game.startGamePolling()
-  //game.stopPollong()
+
   if (userControllerMode) {
     document.addEventListener('keydown', (event) => {
       game.snakeChangeDirection(getDirection(event))

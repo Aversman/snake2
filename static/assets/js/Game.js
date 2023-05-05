@@ -34,8 +34,6 @@ class Food extends Arena {
     this.foodX = 0
     this.foodY = 0
     this.scoreElement = document.querySelector('#game-toolbar-score-counter')
-    this.precentElement = document.querySelector('#game-toolbar-precent-counter')
-    this.maxScoreElement = document.querySelector('#game-toolbar-max_score-counter')
     this.snakeScore = 0
   }
   foodRender() {
@@ -137,7 +135,9 @@ class Snake extends Food {
       this.foodSpawn(this.snakeTail)
       this.snakeScore++
       this.scoreElement.innerHTML = this.snakeScore
+      return true
     }
+    return false
   }
   snakeAddPoint() {
     const lastSnakePoint = this.snakeTail[this.snakeTail.length - 1]
@@ -195,6 +195,7 @@ class GamePolling extends Snake {
     super(...args)
     this.ai = new AI(this.arenaWidth, this.arenaHeight, this.objectsWeight)
     this.polling = null
+    this.k = this.ai.parametrManager(this.snakeScore)
   }
   startGamePolling() {
     this.polling = setInterval(() => {
@@ -205,26 +206,42 @@ class GamePolling extends Snake {
         clearInterval(this.polling)
         return
       }
-      this.snakeChangeDirection(this.ai.getDirection([this.snakeHeadX, this.snakeHeadY]))
+
       this.isSnakeAteFood()
+      this.k = this.ai.parametrManager(this.snakeScore)      
+      this.snakeChangeDirection(this.ai.getDirectionByShortPath([this.snakeHeadX, this.snakeHeadY], this.ai.findShortPoint([this.snakeHeadX, this.snakeHeadY], [this.foodX, this.foodY], this.k), this.snakeDirection))
+
       this.ctx.clearRect(0, 0, this.arenaWidth, this.arenaHeight)
       this.foodRender()
       this.snakeMove()
-    }, 10);
+    }, 5);
   }
   showHamiltonianPoints() {
+    const path = this.ai.hamiltonianPoints
     let counter = 0
-    setInterval(() => {
+    const interval = setInterval(() => {
+      if (counter === path.length - 1) {
+        clearInterval(interval)
+      }
       this.ctx.fillStyle = '#555'
-      const points = this.ai.hamiltonianPoints[counter].split(' ')
+      const points = path[counter].split(' ')
       this.ctx.fillRect(Number(points[0]), Number(points[1]), this.objectsWeight, this.objectsWeight)
-      console.log(counter, this.ai.hamiltonianPoints[counter])
+      console.log(counter, path[counter])
       counter++
-    }, 200)
+    }, 5)
   }
-  renderPoint(x, y) {
-    this.ctx.fillStyle = 'gold'
-    this.ctx.fillRect(x, y, this.objectsWeight, this.objectsWeight)
+  renderPoints() {
+    let currentPoint = [
+      this.snakeHeadX,
+      this.snakeHeadY
+    ]
+    setInterval(() => {
+      const point = this.ai.findShortPoint(currentPoint, [this.foodX, this.foodY]).split(' ')
+      currentPoint[0] = Number(point[0])
+      currentPoint[1] = Number(point[1])
+      this.ctx.fillStyle = 'gold'
+      this.ctx.fillRect(currentPoint[0], currentPoint[1], this.objectsWeight, this.objectsWeight)
+    }, 100)
   }
   stopPollong() {
     if (this.polling) {
